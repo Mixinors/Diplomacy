@@ -1,0 +1,66 @@
+plugins {
+    id "java"
+    id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
+    id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+}
+
+apply plugin: 'kotlin-kapt'
+
+group 'com.github.mixinors'
+version '0.1.0'
+
+repositories {
+    jcenter()
+
+    mavenCentral()
+
+    maven {
+        name = "Arrow"
+        url = "https://dl.bintray.com/arrow-kt/arrow-kt/"
+    }
+}
+
+dependencies {
+    // Kotlin Standard Library
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: "$kotlin_version"
+
+    // Kotlinx Serialization
+    implementation group: "org.jetbrains.kotlinx", name: "kotlinx-serialization-core", version: "$kotlinx_serialization_version"
+
+    // Kotlinx HTML
+    implementation group: "org.jetbrains.kotlinx", name: "kotlinx-html-jvm", version: "$kotlinx_html_version"
+
+    // Ktor Core
+    implementation group: "io.ktor", name: "ktor-server-core", version: "$ktor_version"
+
+    // Ktor Serialization
+    implementation group: "io.ktor", name: "ktor-serialization", version: "$ktor_version"
+
+    // Ktor Netty
+    implementation group: "io.ktor", name: "ktor-server-netty", version: "$ktor_version"
+
+    // Arrow Core
+    implementation group: "io.arrow-kt", name: "arrow-core", version: "$arrow_version"
+
+    // Arrow Syntax
+    implementation group: "io.arrow-kt", name: "arrow-syntax", version: "$arrow_version"
+
+    // Arrow Fx
+    implementation group: "io.arrow-kt", name: "arrow-fx", version: "$arrow_version"
+
+    // Arrow Optics
+    implementation group: "io.arrow-kt", name: "arrow-optics", version: "$arrow_version"
+
+    // Arrow Meta
+    kapt group: "io.arrow-kt", name: "arrow-meta", version: "$arrow_version"
+
+    // JUnit
+    testCompile group: "junit", name: "junit", version: "$junit_version"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
