@@ -18,6 +18,16 @@ repositories {
         name = "Arrow"
         url = "https://dl.bintray.com/arrow-kt/arrow-kt/"
     }
+
+    maven {
+        name = "Mojang"
+        url = "https://libraries.minecraft.net"
+    }
+
+    maven {
+        name = "JitPack"
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
@@ -50,6 +60,15 @@ dependencies {
 
     // Arrow Optics
     implementation group: "io.arrow-kt", name: "arrow-optics", version: "$arrow_version"
+
+    // Kord
+    implementation group: "com.gitlab.kordlib.kord", name: "kord-core", version: "$kord_version"
+
+    // Brigadier
+    implementation group: "com.mojang", name: "brigadier", version: "$brigadier_version"
+
+    // Brigadier Kotlin
+    implementation group: "com.github.Phyrone", name: "brigardier-kotlin", version: "$brigadier_kotlin_version"
 
     // Arrow Meta
     kapt group: "io.arrow-kt", name: "arrow-meta", version: "$arrow_version"

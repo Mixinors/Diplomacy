@@ -26,5 +26,15 @@
       <option name="name" value="Arrow" />
       <option name="url" value="https://dl.bintray.com/arrow-kt/arrow-kt/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="JitPack" />
+      <option name="name" value="JitPack" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="Mojang" />
+      <option name="name" value="Mojang" />
+      <option name="url" value="https://libraries.minecraft.net" />
+    </remote-repository>
   </component>
 </project>
