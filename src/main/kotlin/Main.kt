@@ -1,5 +1,4 @@
 import com.gitlab.kordlib.common.entity.Permission
-import com.gitlab.kordlib.common.entity.Snowflake
 import com.gitlab.kordlib.core.Kord
 import com.gitlab.kordlib.core.any
 import com.gitlab.kordlib.core.behavior.channel.createEmbed
@@ -489,6 +488,211 @@ fun main(args: Array<String>) {
 												}
 
 												return@executes 0
+											}
+										}
+									}
+								}
+							}
+						}
+
+						literal("order") {
+							argument("owner", StringArgument) {
+								argument("nation", StringArgument) {
+									argument("province", StringArgument) {
+										argument("type", StringArgument) {
+											executes {
+												val ownerArgument = it.getArgument<String>("owner")
+												val nationArgument = it.getArgument<String>("nation")
+												val provinceArgument = it.getArgument<String>("province")
+												val typeArgument = it.getArgument<String>("type")
+
+												val ownerOption = getWorld().getNation(ownerArgument)
+												val nationOption = getWorld().getNation(nationArgument)
+												val provinceOption = getWorld().getProvince(provinceArgument)
+
+												val fail: (String) -> Unit = { reason ->
+													GlobalScope.launch {
+														message.channel.createEmbed {
+															title = "Diplomacy"
+															description = "Failed to add an order to the Diplomacy world."
+
+															field("Reason") {
+																reason
+															}
+
+															field("Details") {
+																"""
+                                                                   • Owner: ${ownerArgument}
+                                                                   • Nation: ${nationArgument}
+                                                                   • Province: ${provinceArgument}
+                                                                   • Type: ${typeArgument}
+                                                                """.trimIndent()
+															}
+														}
+													}
+												}
+
+												ownerOption.fold({
+													fail.invoke("Owner nation not found in the Diplomacy world!")
+												}, { owner ->
+													nationOption.fold({
+														fail.invoke("Location nation not found in the Diplomacy world!")
+													}, { nation ->
+														provinceOption.fold({
+															fail.invoke("Location province not found in the Diplomacy world!")
+														}, { province ->
+															val order = Order(owner, Location(nation, province), Location.NONE, Order.Type.valueOf(typeArgument))
+
+															getWorld().addOrder(order).fold({
+																message.channel.createEmbed {
+																	title = "Diplomacy"
+																	description = "Successfully added an order to the Diplomacy world."
+
+																	field("Details") {
+																		"""
+                                                                        	• Owner: ${ownerArgument}
+                                                                        	• Nation: ${nationArgument}
+                                                                        	• Province: ${provinceArgument}
+                                                                        	• Type: ${typeArgument}
+                                                                        """.trimIndent()
+																	}
+																}
+
+																saveWorld()
+															}, { warn ->
+																message.channel.createEmbed {
+																	title = "Diplomacy"
+																	description = "Failed to add an order to the Diplomacy world."
+
+																	field("Reason") {
+																		warn
+																	}
+
+																	field("Details") {
+																		"""
+                                                                        	• Owner: ${ownerArgument}
+                                                                        	• Nation: ${nationArgument}
+                                                                        	• Province: ${provinceArgument}
+                                                                        	• Type: ${typeArgument}
+                                                                        """.trimIndent()
+																	}
+																}
+															})
+														})
+													})
+												})
+
+												return@executes 0
+											}
+										}
+
+										argument("target_nation", StringArgument) {
+											argument("province_nation", StringArgument) {
+												argument("type", StringArgument) {
+													executes {
+														val ownerArgument = it.getArgument<String>("owner")
+														val nationArgument = it.getArgument<String>("nation")
+														val provinceArgument = it.getArgument<String>("province")
+														val typeArgument = it.getArgument<String>("type")
+														val targetNationArgument = it.getArgument<String>("target_nation")
+														val targetProvinceArgument = it.getArgument<String>("province_nation")
+
+														val ownerOption = getWorld().getNation(ownerArgument)
+														val nationOption = getWorld().getNation(nationArgument)
+														val provinceOption = getWorld().getProvince(provinceArgument)
+														val targetNationOption = getWorld().getNation(targetNationArgument)
+														val targetProvinceOption = getWorld().getProvince(targetProvinceArgument)
+
+														val fail: (String) -> Unit = { reason ->
+															GlobalScope.launch {
+																message.channel.createEmbed {
+																	title = "Diplomacy"
+																	description = "Failed to add an order to the Diplomacy world."
+
+																	field("Reason") {
+																		reason
+																	}
+
+																	field("Details") {
+																		"""
+                                                                   			• Owner: ${ownerArgument}
+                                                                   			• Nation: ${nationArgument}
+                                                                   			• Province: ${provinceArgument}
+                                                                   			• Type: ${typeArgument}
+																   			• Target nation: ${targetNationArgument}
+																   			• Target province: ${targetProvinceArgument}
+                                                                		""".trimIndent()
+																	}
+																}
+															}
+														}
+
+														ownerOption.fold({
+															fail.invoke("Owner nation not found in the Diplomacy world!")
+														}, { owner ->
+															nationOption.fold({
+																fail.invoke("Location nation not found in the Diplomacy world!")
+															}, { nation ->
+																provinceOption.fold({
+																	fail.invoke("Location province not found in the Diplomacy world!")
+																}, { province ->
+																	targetNationOption.fold({
+																		fail.invoke("Target nation not found in the Diplomacy world!")
+																	}, { targetNation ->
+																		targetProvinceOption.fold({
+																			fail.invoke("Target province not found in the Diplomacy world!")
+																		}, { targetProvince ->
+																			val order = Order(owner, Location(nation, province), Location(targetNation, targetProvince), Order.Type.valueOf(typeArgument))
+
+																			getWorld().addOrder(order).fold({
+																				message.channel.createEmbed {
+																					title = "Diplomacy"
+																					description = "Successfully added an order to the Diplomacy world."
+
+																					field("Details") {
+																						"""
+                                                                        					• Owner: ${ownerArgument}
+                                                                        					• Nation: ${nationArgument}
+                                                                        					• Province: ${provinceArgument}
+                                                                        					• Type: ${typeArgument}
+																							• Target nation: ${targetNationArgument}
+																   							• Target province: ${targetProvinceArgument}
+                                                                        				""".trimIndent()
+																					}
+																				}
+
+																				saveWorld()
+																			}, { warn ->
+																				message.channel.createEmbed {
+																					title = "Diplomacy"
+																					description = "Failed to add an order to the Diplomacy world."
+
+																					field("Reason") {
+																						warn
+																					}
+
+																					field("Details") {
+																						"""
+                                                                        					• Owner: ${ownerArgument}
+                                                                        					• Nation: ${nationArgument}
+                                                                        					• Province: ${provinceArgument}
+                                                                        					• Type: ${typeArgument}
+																							• Target nation: ${targetNationArgument}
+																   							• Target province: ${targetProvinceArgument}
+                                                                        				""".trimIndent()
+																					}
+																				}
+																			})
+																		})
+																	})
+																})
+															})
+														})
+
+														return@executes 0
+
+													}
+												}
 											}
 										}
 									}
