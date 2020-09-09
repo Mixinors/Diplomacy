@@ -7,6 +7,7 @@ class World {
     private val provinces = mutableListOf<Province>()
     private val groups = mutableListOf<Group>()
     private val orders = mutableListOf<Order>()
+    private val trades = mutableListOf<Trade>()
 
     fun getNation(name: String): Option<Nation> {
         return Option.fromNullable(nations.find { it.name == name })
@@ -35,11 +36,15 @@ class World {
     fun getOrders(): List<Order> {
         return orders.toList()
     }
+    
+    fun getTrades(): List<Trade> {
+        return trades.toList()
+    }
 
     fun addNation(nation: Nation): Option<String> {
         return if (nations.contains(nation)) {
             "Attempted to add nation, when the world already contained it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -51,7 +56,7 @@ class World {
     fun addProvince(province: Province): Option<String> {
         return if (provinces.contains(province)) {
             "Attempted to add province, when the world already contained it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -63,7 +68,7 @@ class World {
     fun addGroup(group: Group): Option<String> {
         return if (groups.contains(group)) {
             "Attempted to add group, when the world already contained it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -75,7 +80,7 @@ class World {
     fun addOrder(order: Order): Option<String> {
         return if (orders.contains(order)) {
             "Attempted to add order, when the world already contained it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -84,10 +89,22 @@ class World {
         }
     }
 
+    fun addTrade(trade: Trade): Option<String> {
+        return if (trades.contains(trade)) {
+            "Attempted to add trade, when the world already contained it!".let { warn ->
+                println(warn)
+                Option.just(warn)
+            }
+        } else {
+            trades.add(trade)
+            Option.empty()
+        }
+    }
+
     fun removeNation(nation: Nation): Option<String> {
         return if (!nations.contains(nation)) {
             "Attempted to remove nation, when the world did not contain it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -99,7 +116,7 @@ class World {
     fun removeProvince(province: Province): Option<String> {
         return if (!provinces.contains(province)) {
             "Attempted to remove province, when the world did not contain it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -111,7 +128,7 @@ class World {
     fun removeGroup(group: Group): Option<String> {
         return if (!groups.contains(group)) {
             "Attempted to remove group, when the world did not contain it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
@@ -123,11 +140,23 @@ class World {
     fun removeOrder(order: Order): Option<String> {
         return if (!orders.contains(order)) {
             "Attempted to remove order, when the world did not contain it!".let { warn ->
-                Main.LOGGER.warn(warn)
+                println(warn)
                 Option.just(warn)
             }
         } else {
             orders.remove(order)
+            Option.empty()
+        }
+    }
+
+    fun removeTrade(trade: Trade): Option<String> {
+        return if (!trades.contains(trade)) {
+            "Attempted to remove trade, when the world did not contain it!".let { warn ->
+                println(warn)
+                Option.just(warn)
+            }
+        } else {
+            trades.remove(trade)
             Option.empty()
         }
     }

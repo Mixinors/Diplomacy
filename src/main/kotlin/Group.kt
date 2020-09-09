@@ -2,12 +2,12 @@ import arrow.core.Option
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Order(val owner: Nation, val location: Location, val target: Location = Location.NONE, val type: Type) {
+data class Order(val owner: Nation, val location: Location, val target: Location = Location.NONE, val type: Type, val groupType: Group.Type) {
     @Serializable
     enum class Type {
         Hold,
         Move,
-        Retreat,
+        Support,
         Disband,
     }
 }

@@ -21,11 +21,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.logging.LogManager
 
 object Main {
-	val LOGGER = LoggerFactory.getLogger("Diplomacy")
+	val LOGGER = LogManager.getLogManager().getLogger("Diplomacy")
 
 	val WORLD: World = loadWorld()
 }
@@ -104,7 +104,7 @@ fun main(args: Array<String>) {
 			if (message.author != null && message.author!!.id != client.selfId) {
 				val dispatcher = CommandDispatcher<Unit>()
 
-				Main.LOGGER.info("Replying to: [${message.content}].")
+				println("Replying to: [${message.content}].")
 
 				dispatcher.run {
 					literal("get") {
@@ -113,7 +113,7 @@ fun main(args: Array<String>) {
 								GlobalScope.launch {
 									message.channel.createEmbed {
 										title = "Diplomacy"
-										description = "The statistics of the current Diplomacy world."
+										description = "The statistics of this world."
 
 										field("Nations") {
 											"${getWorld().getNations().size}"
@@ -142,7 +142,7 @@ fun main(args: Array<String>) {
 								GlobalScope.launch {
 									message.channel.createEmbed {
 										title = "Diplomacy"
-										description = "The nations of the current Diplomacy world."
+										description = "The nations of this world."
 
 										field("Nations") {
 											if (getWorld().getNations().isEmpty()) {
@@ -165,7 +165,7 @@ fun main(args: Array<String>) {
 								GlobalScope.launch {
 									message.channel.createEmbed {
 										title = "Diplomacy: Provinces"
-										description = "The provinces of the current Diplomacy world."
+										description = "The provinces of this world."
 
 										field("Provinces") {
 											if (getWorld().getProvinces().isEmpty()) {
@@ -189,7 +189,7 @@ fun main(args: Array<String>) {
 								GlobalScope.launch {
 									message.channel.createEmbed {
 										title = "Diplomacy"
-										description = "The groups of the current Diplomacy world."
+										description = "The groups of this world."
 
 										field("Groups") {
 											if (getWorld().getGroups().isEmpty()) {
@@ -197,6 +197,56 @@ fun main(args: Array<String>) {
 											} else {
 												getWorld().getGroups().sortedBy { it.owner.name }.joinToString("\n") {
 													"• [**${it.location.nation.name}**, **${it.location.province.name}**], ${it.owner.name}, ${it.type}"
+												}
+											}
+										}
+									}
+								}
+
+								return@executes 0
+							}
+						}
+
+						literal("orders") {
+							executes {
+								GlobalScope.launch {
+									message.channel.createEmbed {
+										title = "Diplomacy"
+										description = "The orders of this world."
+
+										field("Orders") {
+											if (getWorld().getOrders().isEmpty()) {
+												"No orders in this world!"
+											} else {
+												getWorld().getOrders().sortedBy { it.owner.name }.joinToString("\n") {
+													if (it.target == Location.NONE) {
+														"• [**${it.type}**], ${it.location.province.name}, ${it.location.nation.name}"
+													} else {
+														"• [**${it.type}**], [${it.location.province.name}, ${it.location.nation.name}] to [${it.target.nation.name}, ${it.target.province.name}]"
+													}
+												}
+											}
+										}
+									}
+								}
+
+								return@executes 0
+							}
+						}
+
+						literal("provinces") {
+							executes {
+								GlobalScope.launch {
+									message.channel.createEmbed { 
+										title = "Diplomacy"
+										description = "The trades of this world."
+
+										field("Trades") {
+											if (getWorld().getOrders().isEmpty()) {
+												"No trades in this world!"
+											} else {
+												getWorld().getTrades().sortedBy { it.from.nation.name }.joinToString("\n") {
+													"• [**${it.from.nation.name}**, **${it.from.province.name}**] to [**${it.to.nation.name}**, **${it.to.province.name}**"
 												}
 											}
 										}
@@ -226,7 +276,7 @@ fun main(args: Array<String>) {
 														getWorld().addNation(nation).fold({
 															message.channel.createEmbed {
 																title = "Diplomacy"
-																description = "Successfully added a nation to the Diplomacy world."
+																description = "Successfully added a nation to this world."
 
 																field("Details") {
 																	"""
@@ -241,7 +291,7 @@ fun main(args: Array<String>) {
 														}, { warn ->
 															message.channel.createEmbed {
 																title = "Diplomacy"
-																description = "Failed to add a nation to the Diplomacy world."
+																description = "Failed to add a nation to this world."
 
 																field("Reason") {
 																	warn
@@ -291,10 +341,10 @@ fun main(args: Array<String>) {
 															getWorld().getNation(ownerArgument).fold({
 																message.channel.createEmbed {
 																	title = "Diplomacy"
-																	description = "Failed to add a nation to the Diplomacy world."
+																	description = "Failed to add a nation to this world."
 
 																	field("Reason") {
-																		"Nation with the given name not found in the Diplomacy world!"
+																		"Nation with the given name not found in this world!"
 																	}
 																}
 															}, { nation ->
@@ -303,7 +353,7 @@ fun main(args: Array<String>) {
 																getWorld().addProvince(province).fold({
 																	message.channel.createEmbed {
 																		title = "Diplomacy"
-																		description = "Successfully added a province to the Diplomacy world."
+																		description = "Successfully added a province to this world."
 
 																		field("Details") {
 																			"""
@@ -319,7 +369,7 @@ fun main(args: Array<String>) {
 																}, { warn ->
 																	message.channel.createEmbed {
 																		title = "Diplomacy"
-																		description = "Failed to add a province to the Diplomacy world."
+																		description = "Failed to add a province to this world."
 
 																		field("Reason") {
 																			warn
@@ -374,14 +424,14 @@ fun main(args: Array<String>) {
 														val nationOption = getWorld().getNation(nationArgument)
 														val provinceOption = getWorld().getProvince(provinceArgument)
 
-														ownerOption.fold({
+														val fail: (String) -> Unit = { reason ->
 															GlobalScope.launch {
 																message.channel.createEmbed {
 																	title = "Diplomacy"
-																	description = "Failed to add a group to the Diplomacy world."
+																	description = "Failed to add a group to this world."
 
 																	field("Reason") {
-																		"Owner nation not found in the Diplomacy world!"
+																		reason
 																	}
 
 																	field("Details") {
@@ -394,55 +444,23 @@ fun main(args: Array<String>) {
 																	}
 																}
 															}
+														}
+
+														ownerOption.fold({
+
 														}, { owner ->
 															nationOption.fold({
-																GlobalScope.launch {
-																	message.channel.createEmbed {
-																		title = "Diplomacy"
-																		description = "Failed to add a group to the Diplomacy world."
-
-																		field("Reason") {
-																			"Nation not found in the Diplomacy world!"
-																		}
-
-																		field("Details") {
-																			"""
-                                                                            	• Owner: ${ownerArgument}
-                                                                            	• Nation: ${nationArgument}
-                                                                            	• Province: ${provinceArgument}
-                                                                            	• Type: ${typeArgument}
-                                                                            """.trimIndent()
-																		}
-																	}
-																}
+																fail.invoke("Nation not found in this world!")
 															}, { nation ->
 																provinceOption.fold({
-																	GlobalScope.launch {
-																		message.channel.createEmbed {
-																			title = "Diplomacy"
-																			description = "Failed to add a group to the Diplomacy world."
-
-																			field("Reason") {
-																				"Province not found in the Diplomacy world!"
-																			}
-
-																			field("Details") {
-																				"""
-                                                                                    • Owner: ${ownerArgument}
-                                                                                    • Nation: ${nationArgument}
-                                                                                    • Province: ${provinceArgument}
-                                                                                    • Type: ${typeArgument}
-                                                                                """.trimIndent()
-																			}
-																		}
-																	}
+																	fail.invoke("Province not found in this world!")
 																}, { province ->
 																	val group = Group(owner, Location(nation, province), Group.Type.valueOf(typeArgument))
 
 																	getWorld().addGroup(group).fold({
 																		message.channel.createEmbed {
 																			title = "Diplomacy"
-																			description = "Successfully added a group to the Diplomacy world."
+																			description = "Successfully added a group to this world."
 
 																			field("Details") {
 																				"""
@@ -456,23 +474,7 @@ fun main(args: Array<String>) {
 
 																		saveWorld()
 																	}, { warn ->
-																		message.channel.createEmbed {
-																			title = "Diplomacy"
-																			description = "Failed to add a group to the Diplomacy world."
-
-																			field("Reason") {
-																				warn
-																			}
-
-																			field("Details") {
-																				"""
-                                                                                    • Owner: ${ownerArgument}
-                                                                                    • Nation: ${nationArgument}
-                                                                                    • Province: ${provinceArgument}
-                                                                                    • Type: ${typeArgument}
-                                                                                """.trimIndent()
-																			}
-																		}
+																		fail.invoke(warn)
 																	})
 																})
 															})
@@ -500,121 +502,110 @@ fun main(args: Array<String>) {
 								argument("nation", StringArgument) {
 									argument("province", StringArgument) {
 										argument("type", StringArgument) {
-											executes {
-												val ownerArgument = it.getArgument<String>("owner")
-												val nationArgument = it.getArgument<String>("nation")
-												val provinceArgument = it.getArgument<String>("province")
-												val typeArgument = it.getArgument<String>("type")
+											argument("group_type", StringArgument) {
+												executes {
+													val ownerArgument = it.getArgument<String>("owner")
+													val nationArgument = it.getArgument<String>("nation")
+													val provinceArgument = it.getArgument<String>("province")
+													val typeArgument = it.getArgument<String>("type")
+													val groupTypeArgument = it.getArgument<String>("group_type")
 
-												val ownerOption = getWorld().getNation(ownerArgument)
-												val nationOption = getWorld().getNation(nationArgument)
-												val provinceOption = getWorld().getProvince(provinceArgument)
+													val ownerOption = getWorld().getNation(ownerArgument)
+													val nationOption = getWorld().getNation(nationArgument)
+													val provinceOption = getWorld().getProvince(provinceArgument)
 
-												val fail: (String) -> Unit = { reason ->
-													GlobalScope.launch {
-														message.channel.createEmbed {
-															title = "Diplomacy"
-															description = "Failed to add an order to the Diplomacy world."
+													val fail: (String) -> Unit = { reason ->
+														GlobalScope.launch {
+															message.channel.createEmbed {
+																title = "Diplomacy"
+																description = "Failed to add an order to this world."
 
-															field("Reason") {
-																reason
-															}
+																field("Reason") {
+																	reason
+																}
 
-															field("Details") {
-																"""
+																field("Details") {
+																	"""
                                                                    • Owner: ${ownerArgument}
                                                                    • Nation: ${nationArgument}
                                                                    • Province: ${provinceArgument}
                                                                    • Type: ${typeArgument}
                                                                 """.trimIndent()
+																}
 															}
 														}
 													}
-												}
 
-												ownerOption.fold({
-													fail.invoke("Owner nation not found in the Diplomacy world!")
-												}, { owner ->
-													nationOption.fold({
-														fail.invoke("Location nation not found in the Diplomacy world!")
-													}, { nation ->
-														provinceOption.fold({
-															fail.invoke("Location province not found in the Diplomacy world!")
-														}, { province ->
-															val order = Order(owner, Location(nation, province), Location.NONE, Order.Type.valueOf(typeArgument))
+													ownerOption.fold({
+														fail.invoke("Owner nation not found in this world!")
+													}, { owner ->
+														nationOption.fold({
+															fail.invoke("Location nation not found in this world!")
+														}, { nation ->
+															provinceOption.fold({
+																fail.invoke("Location province not found in this world!")
+															}, { province ->
+																val order = Order(owner, Location(nation, province), Location.NONE, Order.Type.valueOf(typeArgument), Group.Type.valueOf(groupTypeArgument))
 
-															getWorld().addOrder(order).fold({
-																message.channel.createEmbed {
-																	title = "Diplomacy"
-																	description = "Successfully added an order to the Diplomacy world."
+																getWorld().addOrder(order).fold({
+																	message.channel.createEmbed {
+																		title = "Diplomacy"
+																		description = "Successfully added an order to this world."
 
-																	field("Details") {
-																		"""
+																		field("Details") {
+																			"""
                                                                         	• Owner: ${ownerArgument}
                                                                         	• Nation: ${nationArgument}
                                                                         	• Province: ${provinceArgument}
                                                                         	• Type: ${typeArgument}
                                                                         """.trimIndent()
-																	}
-																}
-
-																saveWorld()
-															}, { warn ->
-																message.channel.createEmbed {
-																	title = "Diplomacy"
-																	description = "Failed to add an order to the Diplomacy world."
-
-																	field("Reason") {
-																		warn
+																		}
 																	}
 
-																	field("Details") {
-																		"""
-                                                                        	• Owner: ${ownerArgument}
-                                                                        	• Nation: ${nationArgument}
-                                                                        	• Province: ${provinceArgument}
-                                                                        	• Type: ${typeArgument}
-                                                                        """.trimIndent()
-																	}
-																}
+																	saveWorld()
+																}, { warn ->
+																	fail.invoke(warn)
+																})
 															})
 														})
 													})
-												})
 
-												return@executes 0
+													return@executes 0
+												}
 											}
 										}
 
 										argument("target_nation", StringArgument) {
 											argument("province_nation", StringArgument) {
 												argument("type", StringArgument) {
-													executes {
-														val ownerArgument = it.getArgument<String>("owner")
-														val nationArgument = it.getArgument<String>("nation")
-														val provinceArgument = it.getArgument<String>("province")
-														val typeArgument = it.getArgument<String>("type")
-														val targetNationArgument = it.getArgument<String>("target_nation")
-														val targetProvinceArgument = it.getArgument<String>("province_nation")
+													argument("group_type", StringArgument) {
+														executes {
+															val ownerArgument = it.getArgument<String>("owner")
+															val nationArgument = it.getArgument<String>("nation")
+															val provinceArgument = it.getArgument<String>("province")
+															val typeArgument = it.getArgument<String>("type")
+															val targetNationArgument = it.getArgument<String>("target_nation")
+															val targetProvinceArgument = it.getArgument<String>("province_nation")
+															val groupTypeArgument = it.getArgument<String>("group_type")
 
-														val ownerOption = getWorld().getNation(ownerArgument)
-														val nationOption = getWorld().getNation(nationArgument)
-														val provinceOption = getWorld().getProvince(provinceArgument)
-														val targetNationOption = getWorld().getNation(targetNationArgument)
-														val targetProvinceOption = getWorld().getProvince(targetProvinceArgument)
+															val ownerOption = getWorld().getNation(ownerArgument)
+															val nationOption = getWorld().getNation(nationArgument)
+															val provinceOption = getWorld().getProvince(provinceArgument)
+															val targetNationOption = getWorld().getNation(targetNationArgument)
+															val targetProvinceOption = getWorld().getProvince(targetProvinceArgument)
 
-														val fail: (String) -> Unit = { reason ->
-															GlobalScope.launch {
-																message.channel.createEmbed {
-																	title = "Diplomacy"
-																	description = "Failed to add an order to the Diplomacy world."
+															val fail: (String) -> Unit = { reason ->
+																GlobalScope.launch {
+																	message.channel.createEmbed {
+																		title = "Diplomacy"
+																		description = "Failed to add an order to this world."
 
-																	field("Reason") {
-																		reason
-																	}
+																		field("Reason") {
+																			reason
+																		}
 
-																	field("Details") {
-																		"""
+																		field("Details") {
+																			"""
                                                                    			• Owner: ${ownerArgument}
                                                                    			• Nation: ${nationArgument}
                                                                    			• Province: ${provinceArgument}
@@ -622,35 +613,35 @@ fun main(args: Array<String>) {
 																   			• Target nation: ${targetNationArgument}
 																   			• Target province: ${targetProvinceArgument}
                                                                 		""".trimIndent()
+																		}
 																	}
 																}
 															}
-														}
 
-														ownerOption.fold({
-															fail.invoke("Owner nation not found in the Diplomacy world!")
-														}, { owner ->
-															nationOption.fold({
-																fail.invoke("Location nation not found in the Diplomacy world!")
-															}, { nation ->
-																provinceOption.fold({
-																	fail.invoke("Location province not found in the Diplomacy world!")
-																}, { province ->
-																	targetNationOption.fold({
-																		fail.invoke("Target nation not found in the Diplomacy world!")
-																	}, { targetNation ->
-																		targetProvinceOption.fold({
-																			fail.invoke("Target province not found in the Diplomacy world!")
-																		}, { targetProvince ->
-																			val order = Order(owner, Location(nation, province), Location(targetNation, targetProvince), Order.Type.valueOf(typeArgument))
+															ownerOption.fold({
+																fail.invoke("Owner nation not found in this world!")
+															}, { owner ->
+																nationOption.fold({
+																	fail.invoke("Location nation not found in this world!")
+																}, { nation ->
+																	provinceOption.fold({
+																		fail.invoke("Location province not found in this world!")
+																	}, { province ->
+																		targetNationOption.fold({
+																			fail.invoke("Target nation not found in this world!")
+																		}, { targetNation ->
+																			targetProvinceOption.fold({
+																				fail.invoke("Target province not found in this world!")
+																			}, { targetProvince ->
+																				val order = Order(owner, Location(nation, province), Location(targetNation, targetProvince), Order.Type.valueOf(typeArgument), Group.Type.valueOf(groupTypeArgument))
 
-																			getWorld().addOrder(order).fold({
-																				message.channel.createEmbed {
-																					title = "Diplomacy"
-																					description = "Successfully added an order to the Diplomacy world."
+																				getWorld().addOrder(order).fold({
+																					message.channel.createEmbed {
+																						title = "Diplomacy"
+																						description = "Successfully added an order to this world."
 
-																					field("Details") {
-																						"""
+																						field("Details") {
+																							"""
                                                                         					• Owner: ${ownerArgument}
                                                                         					• Nation: ${nationArgument}
                                                                         					• Province: ${provinceArgument}
@@ -658,41 +649,109 @@ fun main(args: Array<String>) {
 																							• Target nation: ${targetNationArgument}
 																   							• Target province: ${targetProvinceArgument}
                                                                         				""".trimIndent()
-																					}
-																				}
-
-																				saveWorld()
-																			}, { warn ->
-																				message.channel.createEmbed {
-																					title = "Diplomacy"
-																					description = "Failed to add an order to the Diplomacy world."
-
-																					field("Reason") {
-																						warn
+																						}
 																					}
 
-																					field("Details") {
-																						"""
-                                                                        					• Owner: ${ownerArgument}
-                                                                        					• Nation: ${nationArgument}
-                                                                        					• Province: ${provinceArgument}
-                                                                        					• Type: ${typeArgument}
-																							• Target nation: ${targetNationArgument}
-																   							• Target province: ${targetProvinceArgument}
-                                                                        				""".trimIndent()
-																					}
-																				}
+																					saveWorld()
+																				}, { warn ->
+																					fail.invoke(warn)
+																				})
 																			})
 																		})
 																	})
 																})
 															})
-														})
 
-														return@executes 0
-
+															return@executes 0
+														}
 													}
 												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+						literal("trade") {
+							argument("origin_nation", StringArgument) {
+								argument("origin_province", StringArgument) {
+									argument("target_nation", StringArgument) {
+										argument("target_province", StringArgument) {
+											executes {
+												val originNationArgument = it.getArgument<String>("origin_nation")
+												val originProvinceArgument = it.getArgument<String>("origin_province")
+
+												val targetNationArgument = it.getArgument<String>("target_nation")
+												val targetProvinceArgument = it.getArgument<String>("target_province")
+
+												val originNationOption = getWorld().getNation(originNationArgument)
+												val originProvinceOption = getWorld().getProvince(originProvinceArgument)
+
+												val targetNationOption = getWorld().getNation(targetNationArgument)
+												val targetProvinceOption = getWorld().getProvince(targetProvinceArgument)
+
+												val fail: (String) -> Unit = { reason ->
+													GlobalScope.launch {
+														message.channel.createEmbed {
+															title = "Diplomacy"
+															description = "Failed to add a trade to this world."
+
+															field("Reason") {
+																reason
+															}
+
+															field("Details") {
+																"""
+                                                                	• Nation from: ${originNationArgument}
+                                                                	• Province from: ${originProvinceArgument}
+                                                                	• Nation to: ${targetNationArgument}
+                                                                	• Province to: ${targetProvinceArgument}
+                                                                """.trimIndent()
+															}
+														}
+													}
+												}
+
+												originNationOption.fold({
+													fail.invoke("Origin nation not found in this world!")
+												}, { originNation ->
+													originProvinceOption.fold({
+														fail.invoke("Origin province not found in this world!")
+													}, { originProvince ->
+														targetNationOption.fold({
+															fail.invoke("Target nation not found in this world!")
+														}, { targetNation ->
+															targetProvinceOption.fold({
+																fail.invoke("Target province not found in this world!")
+															}, { targetProvince ->
+																val trade = Trade(Location(originNation, originProvince), Location(targetNation, targetProvince))
+
+																getWorld().addTrade(trade).fold({
+																	message.channel.createEmbed {
+																		title = "Diplomacy"
+																		description = "Successfully added a trade to this world."
+
+																		field("Details") {
+																			"""
+                                                               				 	• Nation from: ${originNationArgument}
+                                                               				 	• Province from: ${originProvinceArgument}
+                                                               				 	• Nation to: ${targetNationArgument}
+                                                               				 	• Province to: ${targetProvinceArgument}
+                                                               				 """.trimIndent()
+																		}
+																	}
+
+																	saveWorld()
+																}, { warn ->
+																	fail.invoke(warn)
+																})
+															})
+														})
+													})
+												})
+
+												return@executes 0
 											}
 										}
 									}
@@ -740,6 +799,141 @@ fun main(args: Array<String>) {
 							return@executes 0
 						}
 					}
+
+					literal("turn") {
+						argument("phase", StringArgument) {
+							executes {
+								val phase = it.getArgument<String>("phase")
+
+								when (phase) {
+									"draft" -> {
+										message.channel.createEmbed {
+											title = "Diplomacy"
+											description = "Rulers of this world, it is time to draft your orders!"
+										}
+									}
+
+									"execute" -> {
+										message.channel.createEmbed {
+											title = "Diplomacy"
+											description = "Rulers of this world, your orders will now be executed."
+										}
+
+										val world = getWorld()
+
+										message.channel.createEmbed {
+											title = "Diplomacy"
+											description = "Executing ${Order.Type.Hold} orders."
+										}
+
+										world.getOrders().filter { it.type == Order.Type.Hold }.forEach {
+											message.channel.createEmbed {
+												field("Details") {
+													"""
+                                                    	• Owner: ${it.owner.name}
+                                                    	• Nation: ${it.location.nation.name}
+                                                    	• Province: ${it.location.province.name}
+                                                    """.trimIndent()
+												}
+											}
+
+											if (it.owner != it.location.nation) {
+												message.channel.createEmbed {
+													title = "Execution failure!"
+													description = "${it.owner.name} attempted to hold troops in ${it.location.nation}'s territory!"
+												}
+												return@forEach
+											} else {
+												message.channel.createEmbed {
+													title = "Execution success!"
+													description = "${it.owner.name} held troops in itss territory!"
+												}
+											}
+										}
+
+										message.channel.createEmbed {
+											title = "Diplomacy"
+											description = "Executing ${Order.Type.Move} orders."
+										}
+
+										world.getOrders().filter { it.type == Order.Type.Move }.forEach {
+											message.channel.createEmbed {
+												field("Execution details") {
+													"""
+                                                    	• Owner: ${it.owner.name}
+                                                    	• Nation: ${it.location.nation.name}
+                                                    	• Province: ${it.location.province.name}
+														• Target nation: ${it.target.nation.name}
+														• Target province: ${it.target.province.name}
+                                                    """.trimIndent()
+												}
+											}
+
+											if (it.owner != it.location.nation) {
+												message.channel.createEmbed {
+													title = "Execution failure"
+													description = "${it.owner.name} attempted to move a group in anotehr nation's territory!"
+												}
+												return@forEach
+											} else {
+												val order = it
+												val groupOption = world.getGroup(it.location, it.groupType)
+
+												groupOption.fold({
+														message.channel.createEmbed {
+															title = "Execution failure"
+															description = "${it.owner.name} attempted to move a group that does not exist!"
+														}
+													}, {
+														val existing = world.getGroups().filter { it.location == order.target }
+														var required = existing.count()
+														world.getOrders().filter {
+															it.type == Order.Type.Support
+														}.forEach {
+															if (it.target == order.target) {
+																required += 1
+															}
+															if (it.target == order.target) {
+																required -= 1
+															}
+														}
+
+														if (required <= 0) {
+															message.channel.createEmbed {
+																title = "Execution success"
+																description = "${it.owner.name} moved a group to another province with a sweeping victory!"
+															}
+
+															existing.forEach {
+																world.removeGroup(it)
+															}
+														} else {
+															message.channel.createEmbed {
+																title = "Execution success"
+																description = "${it.owner.name} failed to move a group to another province!"
+															}
+														}
+
+														world.removeOrder(order)
+													})
+												}
+											}
+										}
+
+									"retreat" -> {
+
+									}
+									"disband" -> {
+
+									}
+
+								}
+
+								return@executes 0
+							}
+						}
+
+					}
 				}
 
 				dispatcher.execute(message.content, Unit)
@@ -750,12 +944,22 @@ fun main(args: Array<String>) {
 	}
 }
 
-fun loadWorld() = File("world.json").inputStream().bufferedReader().use {
-	Json.decodeFromString<World>(it.readText())
+fun loadWorld() = File("world.json").let {
+	if (it.exists()) {
+		it.inputStream().bufferedReader().use {
+			Json.decodeFromString<World>(it.readText())
+		}
+	} else {
+		World()
+	}
 }
 
-fun saveWorld() = File("world.json").outputStream().bufferedWriter().use {
-	it.write(Json.encodeToString(Main.WORLD))
+fun saveWorld() = File("world.json").also {
+	if (it.exists() || it.createNewFile()) {
+		it.outputStream().bufferedWriter().use {
+			it.write(Json.encodeToString(Main.WORLD))
+		}
+	}
 }
 
 fun getWorld() = Main.WORLD
