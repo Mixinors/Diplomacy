@@ -2,6 +2,59 @@ import arrow.core.Option
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class Location(val nation: Nation, val province: Province) {
+    companion object {
+        val NONE = Location(Nation.NONE, Province.NONE)
+    }
+}
+
+@Serializable
+data class Group(val owner: Nation, val location: Location, val type: Type, val strength: Int = 1, val cost: Int = 1) {
+    @Serializable
+    enum class Type {
+        Army,
+        Fleet,
+        Wing,
+    }
+}
+
+@Serializable
+data class Nation(val name: String, val code: String, val owner: Long) {
+    companion object {
+        val NONE = Nation("none", "none", -1)
+    }
+}
+
+@Serializable
+data class Order(val owner: Nation, val location: Location, val target: Location = Location.NONE, val type: Type, val groupType: Group.Type) {
+    @Serializable
+    enum class Type {
+        Hold,
+        Move,
+        Support,
+        Disband,
+    }
+}
+
+@Serializable
+data class Province(val owner: Nation, val name: String, val type: Type, val center: Boolean = false) {
+    @Serializable
+    enum class Type {
+        Sea,
+        Land,
+        Inland,
+        None,
+    }
+
+    companion object {
+        val NONE = Province(Nation.NONE, "none", Type.None)
+    }
+}
+
+@Serializable
+data class Trade(val from: Location, val to: Location)
+
+@Serializable
 class World {
     private val nations = mutableListOf<Nation>()
     private val provinces = mutableListOf<Province>()
