@@ -1,0 +1,53 @@
+@import url(https://unpkg.com/purecss@2.0.3/build/pure-min.css);
+
+html {
+    background-color: rgb(240, 192, 192)
+}
+
+.button-flat {
+    border-radius: 0;
+    background-color: rgb(240, 144, 168);
+    color: ghostwhite;
+    font-family: "Calibri";
+}
+
+.header-flat {
+    background-color: rgb(240, 96, 120);
+    width: 100%;
+    color: ghostwhite;
+    font-size: 16px;
+    font-family: "Calibri";
+    padding-left: 32px;
+    padding-top: 0;
+}
+
+.header-top {
+    height: 64px;
+}
+
+.header-top-heading {
+    margin: 0;
+    padding: 0;
+}
+
+.sub-header-top {
+    background-color: rgb(240, 120, 144);
+    height: 34px;
+    padding-left: 32px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.header-bottom {
+    height: 24px;
+    position: fixed;
+    bottom: 0;
+}
+
+.list-flat {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: rgb(240, 144, 168);
+    color: whitesmoke;
+    list-style-type: square;
+}

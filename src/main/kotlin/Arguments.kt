@@ -28,7 +28,7 @@ val ProvinceArgument = ArgumentType {
 }
 
 val ProvinceTypeArgument = ArgumentType { 
-	Option.fromNullable(Province.Type.values().any { type -> type.toString() == it.readQuotedString() }).fold({
+	Option.fromNullable(Province.Type.values().find { type -> type.toString() == it.readQuotedString() }).fold({
 		throw CommandSyntaxException(InvalidProvinceTypeException) {
 			"Invalid province type!"
 		}
@@ -38,9 +38,9 @@ val ProvinceTypeArgument = ArgumentType {
 }
 
 val GroupTypeArgument = ArgumentType {
-	Option.fromNullable(Group.Type.values().any { type -> type.toString() == it.readQuotedString() }).fold({
+	Option.fromNullable(Group.Type.values().find { type -> type.toString() == it.readQuotedString() }).fold({
 		throw CommandSyntaxException(InvalidGroupTypeException) {
-			"Invalid province type!"
+			"Invalid group type!"
 		}
 	}, { type ->
 		type
@@ -48,9 +48,9 @@ val GroupTypeArgument = ArgumentType {
 }
 
 val OrderTypeArgument = ArgumentType {
-	Option.fromNullable(Order.Type.values().any { type -> type.toString() == it.readQuotedString() }).fold({
+	Option.fromNullable(Order.Type.values().find { type -> type.toString() == it.readQuotedString() }).fold({
 		throw CommandSyntaxException(InvalidOrderTypeException) {
-			"Invalid province type!"
+			"Invalid order type!"
 		}
 	}, { type ->
 		type
