@@ -68,6 +68,10 @@ fun main(args: Array<String>) {
 				call.respond(Json.encodeToJsonElement(Main.WORLD.getOrders()))
 			}
 
+			get("/trades") {
+				call.respond(Json.encodeToJsonElement(Main.WORLD.getTrades()))
+			}
+
 			post("/nations") {
 				call.receive<Nation>().also { nation ->
 					getWorld().addNation(nation).fold({
@@ -101,6 +105,16 @@ fun main(args: Array<String>) {
 			post("/orders") {
 				call.receive<Order>().also { order ->
 					getWorld().addOrder(order).fold({
+						call.respond(HttpStatusCode.Accepted)
+					}, { warn ->
+						call.respond(HttpStatusCode.Conflict, warn)
+					})
+				}
+			}
+
+			post("/trades") {
+				call.receive<Trade>().also { trade ->
+					getWorld().addTrade(trade).fold({
 						call.respond(HttpStatusCode.Accepted)
 					}, { warn ->
 						call.respond(HttpStatusCode.Conflict, warn)

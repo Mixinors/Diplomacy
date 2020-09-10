@@ -39,6 +39,10 @@ function getOrderString(data) {
         ((data.target.nation.name == "none") ? (".") :  (" with target " + data.target.province.name + ", in " + data.target.nation.name + "."))
 }
 
+function getTradeString(data) {
+    return data.from.province.name + ", " + data.from.nation.name + " is trading with " + data.to.province.name + ", " + data.to.nation.name + "."
+}
+
 function onClickWorld() {
     const body = getMainBody()
 
@@ -60,6 +64,10 @@ function onClickWorld() {
         const orderItem = document.createElement("li");
         orderItem.appendChild(document.createTextNode("There " + ((data.orders.length > 1) ? ("are ") : ("is ")) +  toWords(data.orders.length) + " order" + ((data.orders.length > 1) ? "s" : "") + " in this world."))
         mainList.appendChild(orderItem)
+
+        const tradeItem = document.createElement("li");
+        tradeItem.appendChild(document.createTextNode("There " + ((data.trades.length > 1) ? ("are ") : ("is ")) +  toWords(data.trades.length) + " trade" + ((data.trades.length > 1) ? "s" : "") + " in this world."))
+        mainList.appendChild(tradeItem)
     }))
 
     body.appendChild(mainList)
@@ -123,6 +131,22 @@ function onClickOrders() {
             const orderItem = document.createElement("li")
             orderItem.appendChild(document.createTextNode(getOrderString(order)))
             mainList.appendChild(orderItem)
+        })
+    }))
+
+    body.appendChild(mainList)
+}
+
+function onClickTrades() {
+    const body = getMainBody()
+
+    const mainList = getClearList()
+
+    fetch("http://localhost:443/trades").then(response => response.json().then(data => {
+        data.forEach(trade => {
+            const tradeItem = document.createElement("li")
+            tradeItem.appendChild(document.createTextNode(getTradeString(trade)))
+            mainList.appendChild(tradeItem)
         })
     }))
 
